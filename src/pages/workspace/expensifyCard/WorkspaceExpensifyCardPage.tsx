@@ -12,6 +12,7 @@ import {updateSelectedExpensifyCardFeed} from '@libs/actions/Card';
 import {filterInactiveCardsForWorkspace, getCardSettings} from '@libs/CardUtils';
 import type {PlatformStackScreenProps} from '@libs/Navigation/PlatformStackNavigation/types';
 import type {WorkspaceSplitNavigatorParamList} from '@libs/Navigation/types';
+import {isArchivedPolicy} from '@libs/PolicyUtils';
 
 import AccessOrNotFoundWrapper from '@pages/workspace/AccessOrNotFoundWrapper';
 
@@ -35,9 +36,12 @@ function WorkspaceExpensifyCardPage({route}: WorkspaceExpensifyCardPageProps) {
     useWorkspaceDocumentTitle(policy?.name, 'workspace.common.expensifyCard');
     const defaultFundID = useDefaultFundID(policyID);
 
+    const isArchived = isArchivedPolicy(policy);
+    const filterCards = useCallback((cards: Parameters<typeof filterInactiveCardsForWorkspace>[0]) => filterInactiveCardsForWorkspace(cards, isArchived), [isArchived]);
+
     const [cardSettings] = useOnyx(`${ONYXKEYS.COLLECTION.PRIVATE_EXPENSIFY_CARD_SETTINGS}${defaultFundID}`);
     const settings = getCardSettings(cardSettings);
-    const [cardsList] = useOnyx(`${ONYXKEYS.COLLECTION.WORKSPACE_CARDS_LIST}${defaultFundID}_${CONST.EXPENSIFY_CARD.BANK}`, {selector: filterInactiveCardsForWorkspace});
+    const [cardsList] = useOnyx(`${ONYXKEYS.COLLECTION.WORKSPACE_CARDS_LIST}${defaultFundID}_${CONST.EXPENSIFY_CARD.BANK}`, {selector: filterCards});
     const [cardsPageLoadingState] = useOnyx(`${ONYXKEYS.COLLECTION.RAM_ONLY_EXPENSIFY_CARD_LOADING_STATE}${policyID}`);
 
     const fetchExpensifyCards = useCallback(() => {

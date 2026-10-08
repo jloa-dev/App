@@ -1533,9 +1533,12 @@ function checkIfNewFeedConnected(prevFeedsData: CombinedCardFeeds, currentFeedsD
  * suspended cards are only kept when frozen, or when `includeDeactivated` is set (workspace card management
  * views) so admin-zeroed Expensify Cards remain manageable.
  */
-function isActiveCard(card: Card, includeDeactivated = false): boolean {
+function isActiveCard(card: Card, includeDeactivated = false, isArchivedWorkspace = false): boolean {
     if (card.state === CONST.EXPENSIFY_CARD.STATE.STATE_SUSPENDED) {
         return !!card.nameValuePairs?.frozen || includeDeactivated;
+    }
+    if (isArchivedWorkspace && card.state === CONST.EXPENSIFY_CARD.STATE.STATE_DEACTIVATED) {
+        return true;
     }
     return card.state !== CONST.EXPENSIFY_CARD.STATE.CLOSED && card.state !== CONST.EXPENSIFY_CARD.STATE.STATE_DEACTIVATED;
 }
@@ -1546,7 +1549,7 @@ function isActiveCard(card: Card, includeDeactivated = false): boolean {
  * Expensify Cards are also kept — these are cards an admin set to a $0 limit, which the backend then
  * transitions to deactivated/suspended. Admins still need to be able to find and manage them.
  */
-function filterAllInactiveCards(cards: WorkspaceCardsList | undefined, includeDeactivated = false, includeCardList = false): CardList {
+function filterAllInactiveCards(cards: WorkspaceCardsList | undefined, includeDeactivated = false, includeCardList = false, isArchivedWorkspace = false): CardList {
     const result: CardList = {};
     if (!cards) {
         return result;
@@ -1563,7 +1566,7 @@ function filterAllInactiveCards(cards: WorkspaceCardsList | undefined, includeDe
             continue;
         }
 
-        if (isActiveCard(card, includeDeactivated)) {
+        if (isActiveCard(card, includeDeactivated, isArchivedWorkspace)) {
             result[key] = card;
         }
     }
@@ -1578,8 +1581,8 @@ function filterInactiveCards(cardsList: WorkspaceCardsList | undefined) {
  * Onyx selector for workspace Expensify Card management pages. Same as `filterInactiveCards`, but also
  * keeps all suspended cards so admins can view and edit them.
  */
-function filterInactiveCardsForWorkspace(cardsList: WorkspaceCardsList | undefined) {
-    return filterAllInactiveCards(cardsList, true, true) as WorkspaceCardsList;
+function filterInactiveCardsForWorkspace(cardsList: WorkspaceCardsList | undefined, isArchivedWorkspace = false) {
+    return filterAllInactiveCards(cardsList, true, true, isArchivedWorkspace) as WorkspaceCardsList;
 }
 
 function getAllCardsForWorkspace(

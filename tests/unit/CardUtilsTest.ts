@@ -4180,6 +4180,25 @@ describe('CardUtils', () => {
             expect(result.deactivatedNoCustomFlag).toBeUndefined();
             expect(result.cardList).toBeDefined();
         });
+
+        it('keeps deactivated cards when isArchivedWorkspace is true', () => {
+            const cardsList = createMock<WorkspaceCardsList>({
+                active: {cardID: 1, state: CONST.EXPENSIFY_CARD.STATE.OPEN, bank: CONST.EXPENSIFY_CARD.BANK, cardName: '1234', nameValuePairs: {unapprovedExpenseLimit: 1000}},
+                closed: {cardID: 2, state: CONST.EXPENSIFY_CARD.STATE.CLOSED, bank: CONST.EXPENSIFY_CARD.BANK, cardName: '5678', nameValuePairs: {unapprovedExpenseLimit: 0}},
+                deactivated: {
+                    cardID: 3,
+                    state: CONST.EXPENSIFY_CARD.STATE.STATE_DEACTIVATED,
+                    bank: CONST.EXPENSIFY_CARD.BANK,
+                    cardName: '9012',
+                    nameValuePairs: {unapprovedExpenseLimit: 0},
+                },
+            });
+
+            const result = filterInactiveCardsForWorkspace(cardsList, true);
+            expect(result.active).toBeDefined();
+            expect(result.deactivated).toBeDefined();
+            expect(result.closed).toBeUndefined();
+        });
     });
 
     describe('UnassignedCard type through getFilteredCardList', () => {
