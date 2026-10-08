@@ -200,7 +200,7 @@ function getTagNamesFromTagsLists(policyTagLists: PolicyTagLists): string[] {
  * and HTML-decodes the result so tags stored with encoded entities display correctly (e.g. `R&amp;D`, renders as `R&D`)
  */
 function getCleanedTagName(tag: string) {
-    return Str.htmlDecode(tag?.replaceAll('\\:', CONST.COLON) ?? '');
+    return Str.htmlDecode(tag?.replaceAll('\\:', CONST.COLON).replaceAll('\\\\', '\\') ?? '');
 }
 
 /**
@@ -257,7 +257,7 @@ function getGLCodeFromPolicyTag(tag: {['GL Code']?: string | number} | undefined
  * Escape colon from tag name
  */
 function escapeTagName(tag: string) {
-    return tag?.replaceAll(CONST.COLON, '\\:');
+    return tag?.replaceAll('\\', '\\\\').replaceAll(CONST.COLON, '\\:');
 }
 
 /**

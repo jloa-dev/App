@@ -63,6 +63,7 @@ import {
     findPolicyTagAtLevel,
     findPolicyTagEntryByParentFilter,
     getTagGLCode,
+    escapeTagName,
     getCleanedTagName,
     getCommaSeparatedTagNameWithSanitizedColons,
     getTagLists,
@@ -2525,6 +2526,8 @@ describe('PolicyUtils', () => {
                 ['unescapes colons used to build multi-level tags', 'Parent\\: Child', 'Parent: Child'],
                 ['HTML-decodes encoded entities', 'R&amp;D', 'R&D'],
                 ['unescapes colons and decodes entities together', 'R&amp;D\\: Lab', 'R&D: Lab'],
+                ['unescapes tags with escaped backslash and colon', 'Parent\\\\\\: Child', 'Parent\\: Child'],
+                ['unescapes tags with double backslashes', 'Tag\\\\With\\\\Backslash', 'Tag\\With\\Backslash'],
                 ['returns a plain tag unchanged', 'Engineering', 'Engineering'],
                 ['returns an empty string for an empty tag', '', ''],
             ])('%s', (_description, tag, expected) => {
@@ -2533,6 +2536,18 @@ describe('PolicyUtils', () => {
                 const result = getCleanedTagName(tag);
 
                 // Then escaped colons are restored and HTML entities are decoded so the user sees the readable name
+                expect(result).toBe(expected);
+            });
+        });
+
+        describe('escapeTagName', () => {
+            it.each([
+                ['escapes colons', 'Parent: Child', 'Parent\\: Child'],
+                ['escapes backslashes and colons', 'Parent\\: Child', 'Parent\\\\\\: Child'],
+                ['escapes backslashes', 'Tag\\With\\Backslash', 'Tag\\\\With\\\\Backslash'],
+                ['returns a plain tag unchanged', 'Engineering', 'Engineering'],
+            ])('%s', (_description, tag, expected) => {
+                const result = escapeTagName(tag);
                 expect(result).toBe(expected);
             });
         });
