@@ -12,6 +12,7 @@ import {getEffectiveDistance} from '@libs/GPSDraftDetailsUtils';
 
 import {fontScale} from '@styles/typography';
 
+import CONST from '@src/CONST';
 import ONYXKEYS from '@src/ONYXKEYS';
 import type {Unit} from '@src/types/onyx/Policy';
 
@@ -22,7 +23,7 @@ type DistanceCounterProps = {
 
 function DistanceCounter({unit}: DistanceCounterProps) {
     const styles = useThemeStyles();
-    const {translate} = useLocalize();
+    const {translate, preferredLocale} = useLocalize();
     const icons = useMemoizedLazyExpensifyIcons(['Crosshair']);
     const StyleUtils = useStyleUtils();
 
@@ -30,14 +31,31 @@ function DistanceCounter({unit}: DistanceCounterProps) {
 
     const distance = DistanceRequestUtils.getRoundedDistanceInUnits(getEffectiveDistance(gpsDraftDetails), unit);
 
+    const unitIdentifier = unit === CONST.CUSTOM_UNITS.DISTANCE_UNIT_MILES ? 'mile' : 'kilometer';
+    const numberFormatter = new Intl.NumberFormat(preferredLocale, {
+        style: 'unit',
+        unit: unitIdentifier,
+        unitDisplay: 'short',
+    });
+    const formattedParts = numberFormatter.formatToParts(distance);
+
     return (
         <MenuItemWithTopDescription
             interactive={false}
             description={translate('common.distance')}
             titleComponent={
-                <Text style={[styles.iouAmountTextInput, styles.textXLarge, styles.colorMuted, styles.ml3]}>
-                    <Text style={[styles.iouAmountTextInput, styles.textXLarge]}>{distance}</Text>
-                    {` ${unit}`}
+                <Text style={[styles.iouAmountTextInput, styles.textXLarge, styles.ml3]}>
+                    {formattedParts.map((part, index) => {
+                        const isValuePart = ['integer', 'decimal', 'fraction', 'group'].includes(part.type);
+                        return (
+                            <Text
+                                key={`${part.type}-${index}`}
+                                style={isValuePart ? [styles.iouAmountTextInput, styles.textXLarge] : [styles.iouAmountTextInput, styles.textXLarge, styles.colorMuted]}
+                            >
+                                {part.value}
+                            </Text>
+                        );
+                    })}
                 </Text>
             }
             style={[styles.ph0]}
