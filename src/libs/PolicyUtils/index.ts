@@ -655,6 +655,10 @@ function getUnitRateValue(toLocaleDigit: (arg: string) => string, customUnitRate
  * Get the brick road indicator status for a policy. The policy has an error status if there is a policy member error, a custom unit error or a field error.
  */
 function getPolicyBrickRoadIndicatorStatus(policy: OnyxEntry<Policy>, isConnectionInProgress: boolean): ValueOf<typeof CONST.BRICK_ROAD_INDICATOR_STATUS> | undefined {
+    if (isArchivedPolicy(policy)) {
+        return undefined;
+    }
+
     if (
         shouldShowEmployeeListError(policy) ||
         shouldShowCustomUnitsError(policy) ||
