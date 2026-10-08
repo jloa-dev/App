@@ -124,8 +124,15 @@ function ReportNotFoundGuard({children}: ReportNotFoundGuardProps) {
         );
     }
 
-    if (!deleteTransactionNavigateBackUrl && isReportTransactionThread(report)) {
-        return <ReportNotFoundInnerGuard reportIDFromPath={routeParams?.reportID}>{children}</ReportNotFoundInnerGuard>;
+    if (isReportTransactionThread(report)) {
+        return (
+            <ReportNotFoundInnerGuard
+                reportIDFromPath={routeParams?.reportID}
+                shouldCheckParent={!deleteTransactionNavigateBackUrl}
+            >
+                {children}
+            </ReportNotFoundInnerGuard>
+        );
     }
 
     return children;
@@ -133,6 +140,7 @@ function ReportNotFoundGuard({children}: ReportNotFoundGuardProps) {
 
 type ReportNotFoundInnerGuardProps = {
     reportIDFromPath: string | undefined;
+    shouldCheckParent?: boolean;
     children: ReactNode;
 };
 
@@ -141,7 +149,7 @@ type ReportNotFoundInnerGuardProps = {
  * parentReportMetadata and parentReportAction to detect deleted parent actions.
  */
 
-function ReportNotFoundInnerGuard({reportIDFromPath, children}: ReportNotFoundInnerGuardProps) {
+function ReportNotFoundInnerGuard({reportIDFromPath, shouldCheckParent = true, children}: ReportNotFoundInnerGuardProps) {
     const styles = useThemeStyles();
     const {shouldUseNarrowLayout} = useResponsiveLayout();
     const {isOffline} = useNetwork();
@@ -160,7 +168,7 @@ function ReportNotFoundInnerGuard({reportIDFromPath, children}: ReportNotFoundIn
         isOffline,
     });
 
-    const shouldShowNotFoundPage = isParentActionDeleted || isParentActionMissingAfterLoad;
+    const shouldShowNotFoundPage = shouldCheckParent && (isParentActionDeleted || isParentActionMissingAfterLoad);
 
     useEffect(() => {
         if (!shouldShowNotFoundPage) {
