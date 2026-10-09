@@ -3,6 +3,8 @@ import Table, {composeTableListHeader} from '@components/Table';
 
 import useLocalize from '@hooks/useLocalize';
 
+import CONST from '@src/CONST';
+
 import tokenizedSearch from '@libs/tokenizedSearch';
 
 import variables from '@styles/variables';
@@ -106,7 +108,8 @@ export default function ReportParticipantsTable({ref, headerComponent, members, 
         />
     );
 
-    const tableHeaderComponent = composeTableListHeader(headerComponent, <Table.FilterBar label={translate('selectionList.findMember')} />);
+    const shouldShowSearchBar = members.length >= CONST.STANDARD_LIST_ITEM_LIMIT;
+    const tableHeaderComponent = composeTableListHeader(headerComponent, shouldShowSearchBar ? <Table.FilterBar label={translate('selectionList.findMember')} /> : undefined);
 
     return (
         <Table
