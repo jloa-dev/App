@@ -40,9 +40,14 @@ function AttachmentCarouselView({
 
     const pagerRef = useRef<AttachmentCarouselPagerHandle>(null);
 
+    const isUserInteractingRef = useRef(false);
+
     /** Updates the page state when the user navigates between attachments */
     const updatePage = useCallback(
         (newPageIndex: number) => {
+            if (newPageIndex === page) {
+                return;
+            }
             Keyboard.dismiss();
             setShouldShowArrows(true);
 
@@ -56,7 +61,7 @@ function AttachmentCarouselView({
                 }
             }
         },
-        [setShouldShowArrows, attachments, setPage, onNavigate],
+        [setShouldShowArrows, attachments, setPage, onNavigate, page],
     );
 
     /**
