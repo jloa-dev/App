@@ -17,7 +17,7 @@ import {updateMoneyRequestTaxAmount} from '@libs/actions/IOU/UpdateMoneyRequest'
 import {convertToBackendAmount} from '@libs/CurrencyUtils';
 import getNonEmptyStringOnyxID from '@libs/getNonEmptyStringOnyxID';
 import Navigation from '@libs/Navigation/Navigation';
-import {getTransactionDetails} from '@libs/ReportUtils';
+import {getTransactionDetails, shouldEnableNegative} from '@libs/ReportUtils';
 import {calculateTaxAmount, getAmount, getDefaultTaxCode, getTaxValue, getTaxAmount as getTransactionTaxAmount} from '@libs/TransactionUtils';
 
 import type {CurrentMoney} from '@pages/iou/MoneyRequestAmountForm';
@@ -97,7 +97,8 @@ function DynamicIOURequestStepTaxAmountPage({
     const isASAPSubmitBetaEnabled = isBetaEnabled(CONST.BETAS.ASAP_SUBMIT);
 
     const currentTransaction = isEditingSplitBill && !isEmptyObject(splitDraftTransaction) ? splitDraftTransaction : transaction;
-    const transactionDetails = getTransactionDetails(currentTransaction);
+    const allowNegative = shouldEnableNegative(report, policy, iouType, currentTransaction?.participants);
+    const transactionDetails = getTransactionDetails(currentTransaction, undefined, undefined, allowNegative);
     const currency = transactionDetails?.currency;
     const decimals = getCurrencyDecimals(currency);
 
@@ -131,7 +132,8 @@ function DynamicIOURequestStepTaxAmountPage({
         }
 
         if (isEditing) {
-            if (taxAmountInSmallestCurrencyUnits === getTransactionTaxAmount(currentTransaction, false)) {
+            const currentTaxAmount = allowNegative ? (currentTransaction?.taxAmount ?? 0) : getTransactionTaxAmount(currentTransaction, false);
+            if (taxAmountInSmallestCurrencyUnits === currentTaxAmount) {
                 saveAndNavigateBack();
                 return;
             }
@@ -178,11 +180,12 @@ function DynamicIOURequestStepTaxAmountPage({
             <MoneyRequestAmountForm
                 isEditing
                 currency={currency}
-                amount={Math.abs(transactionDetails?.taxAmount ?? 0)}
+                amount={allowNegative ? (transactionDetails?.taxAmount ?? 0) : Math.abs(transactionDetails?.taxAmount ?? 0)}
                 taxAmount={getTaxAmount(currentTransaction, policy, currency, decimals, true)}
                 ref={(e) => {
                     textInput.current = e;
                 }}
+                allowFlippingAmount={!isEditingSplitBill && allowNegative}
                 // onCurrencyButtonPress is intentionally left empty as currency selection is not allowed on this page
                 onCurrencyButtonPress={() => {}}
                 onSubmitButtonPress={updateTaxAmount}
