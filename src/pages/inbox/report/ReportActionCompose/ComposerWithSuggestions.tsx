@@ -849,10 +849,14 @@ function ComposerWithSuggestions({
 
     const resetHeight = useCallback(() => {
         if (!emptyComposerHeightRef.current) {
+            setComposerHeightAfterClear(null);
             return;
         }
         setComposerHeightAfterClear(emptyComposerHeightRef.current);
-    }, []);
+        requestAnimationFrame(() => {
+            clearComposerHeight();
+        });
+    }, [clearComposerHeight]);
 
     const getCurrentText = useCallback(() => {
         return commentRef.current;
@@ -1004,7 +1008,7 @@ function ComposerWithSuggestions({
             clearComposerHeight();
 
             // Store the default collapsed composer height, so we can later reset the height when we clear the input.
-            if (emptyComposerHeightRef.current === null && inputHeight > 0 && !valueRef.current.includes('\n')) {
+            if (emptyComposerHeightRef.current === null && inputHeight > 0 && valueRef.current.trim() === '') {
                 emptyComposerHeightRef.current = inputHeight;
             }
 
