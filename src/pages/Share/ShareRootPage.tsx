@@ -111,47 +111,52 @@ function ShareRootPage() {
             }
 
             const isImage = /image\/.*/.test(tempFile?.mimeType);
-            if (tempFile?.mimeType && tempFile?.mimeType !== 'txt' && !isImage) {
+            const isText = tempFile?.mimeType === 'txt';
+
+            const finalizeFileProcessing = () => {
+                if (isImage && !shouldValidateFile(tempFile)) {
+                    const fileObject: FileObject = {name: tempFile.id, uri: tempFile?.content, type: tempFile?.mimeType};
+                    validateImageForCorruption(fileObject).catch(() => {
+                        setErrorTitle(translate('attachmentPicker.attachmentError'));
+                        setErrorMessage(translate('attachmentPicker.errorWhileSelectingCorruptedAttachment'));
+                    });
+                }
+
+                const {fileExtension} = splitExtensionFromFileName(tempFile?.content);
+                if (tempFile) {
+                    if (tempFile.mimeType) {
+                        if (receiptFileFormats.includes(tempFile.mimeType) && fileExtension) {
+                            setIsFileScannable(true);
+                            Tab.setSelectedTab(CONST.TAB.SHARE.NAVIGATOR_ID, CONST.TAB.SHARE.SUBMIT);
+                        } else {
+                            setIsFileScannable(false);
+                        }
+                        validateFileIfNecessary(tempFile);
+                        setIsFileReady(true);
+                    }
+
+                    addTempShareFile(tempFile);
+                }
+            };
+
+            if (tempFile?.mimeType && !isText) {
                 getFileSize(tempFile?.content).then((size) => {
                     if (size > CONST.API_ATTACHMENT_VALIDATIONS.MAX_SIZE) {
                         setErrorTitle(translate('attachmentPicker.attachmentTooLarge'));
                         setErrorMessage(translate('attachmentPicker.sizeExceeded'));
+                        return;
                     }
 
                     if (size < CONST.API_ATTACHMENT_VALIDATIONS.MIN_SIZE) {
                         setErrorTitle(translate('attachmentPicker.attachmentTooSmall'));
                         setErrorMessage(translate('attachmentPicker.sizeNotMet'));
+                        return;
                     }
+
+                    finalizeFileProcessing();
                 });
-            }
-
-            // Skip the standalone corruption check for files that go through `validateFileIfNecessary`,
-            // because `validateFiles` already runs corruption checks internally. Running both would
-            // surface a duplicate (and potentially misleading) "corrupt attachment" alert.
-            if (isImage && !shouldValidateFile(tempFile)) {
-                const fileObject: FileObject = {name: tempFile.id, uri: tempFile?.content, type: tempFile?.mimeType};
-                validateImageForCorruption(fileObject).catch(() => {
-                    setErrorTitle(translate('attachmentPicker.attachmentError'));
-                    setErrorMessage(translate('attachmentPicker.errorWhileSelectingCorruptedAttachment'));
-                });
-            }
-
-            const {fileExtension} = splitExtensionFromFileName(tempFile?.content);
-            if (tempFile) {
-                if (tempFile.mimeType) {
-                    if (receiptFileFormats.includes(tempFile.mimeType) && fileExtension) {
-                        setIsFileScannable(true);
-                        // Reset the persisted tab to SUBMIT so that defaultSelectedTab takes effect
-                        // even when a previous Share session left the tab on SHARE.
-                        Tab.setSelectedTab(CONST.TAB.SHARE.NAVIGATOR_ID, CONST.TAB.SHARE.SUBMIT);
-                    } else {
-                        setIsFileScannable(false);
-                    }
-                    validateFileIfNecessary(tempFile);
-                    setIsFileReady(true);
-                }
-
-                addTempShareFile(tempFile);
+            } else if (isText) {
+                finalizeFileProcessing();
             }
         });
     }, [errorTitle, shareFileMimeTypes, translate, receiptFileFormats, validateFileIfNecessary]);
