@@ -155,4 +155,13 @@ describe('useTaxAmount', () => {
         const {result} = renderHook(() => useTaxAmount(baseParams));
         expect(result.current.shouldKeepCurrentTaxSelection).toBe(false);
     });
+
+    it('computes negative taxAmountInSmallestCurrencyUnits when transaction amount is negative', () => {
+        const negativeTransaction = {
+            ...baseTransaction,
+            amount: -1000,
+        };
+        const {result} = renderHook(() => useTaxAmount({...baseParams, transaction: negativeTransaction}));
+        expect(result.current.taxAmountInSmallestCurrencyUnits).toBe(-10000);
+    });
 });

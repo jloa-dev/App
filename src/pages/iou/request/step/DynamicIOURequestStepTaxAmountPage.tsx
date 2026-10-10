@@ -17,7 +17,7 @@ import {updateMoneyRequestTaxAmount} from '@libs/actions/IOU/UpdateMoneyRequest'
 import {convertToBackendAmount} from '@libs/CurrencyUtils';
 import getNonEmptyStringOnyxID from '@libs/getNonEmptyStringOnyxID';
 import Navigation from '@libs/Navigation/Navigation';
-import {getTransactionDetails} from '@libs/ReportUtils';
+import {getTransactionDetails, isExpenseReport, shouldEnableNegative} from '@libs/ReportUtils';
 import {calculateTaxAmount, getAmount, getDefaultTaxCode, getTaxValue, getTaxAmount as getTransactionTaxAmount} from '@libs/TransactionUtils';
 
 import type {CurrentMoney} from '@pages/iou/MoneyRequestAmountForm';
@@ -47,11 +47,20 @@ type DynamicIOURequestStepTaxAmountPageProps = WithWritableReportOrNotFoundProps
     transaction: OnyxEntry<Transaction>;
 };
 
-function getTaxAmount(transaction: OnyxEntry<Transaction>, policy: OnyxEntry<Policy>, currency: string | undefined, decimals: number, isEditing: boolean): number | undefined {
+function getTaxAmount(
+    transaction: OnyxEntry<Transaction>,
+    policy: OnyxEntry<Policy>,
+    currency: string | undefined,
+    decimals: number,
+    isEditing: boolean,
+    isExpenseReport = false,
+    allowNegative = false,
+    disableOppositeConversion = false,
+): number | undefined {
     if (!transaction?.amount && !transaction?.modifiedAmount) {
         return;
     }
-    const transactionTaxAmount = getAmount(transaction);
+    const transactionTaxAmount = getAmount(transaction, isExpenseReport, transaction?.reportID === CONST.REPORT.UNREPORTED_REPORT_ID, allowNegative, disableOppositeConversion);
     const transactionTaxCode = transaction?.taxCode ?? '';
     const defaultTaxCode = getDefaultTaxCode(policy, transaction, currency) ?? '';
     const getTaxValueByTaxCode = (taxCode: string) => getTaxValue(policy, transaction, taxCode);
@@ -97,7 +106,13 @@ function DynamicIOURequestStepTaxAmountPage({
     const isASAPSubmitBetaEnabled = isBetaEnabled(CONST.BETAS.ASAP_SUBMIT);
 
     const currentTransaction = isEditingSplitBill && !isEmptyObject(splitDraftTransaction) ? splitDraftTransaction : transaction;
-    const transactionDetails = getTransactionDetails(currentTransaction);
+    const isCreateAction = action === CONST.IOU.ACTION.CREATE;
+    const isSubmitAction = action === CONST.IOU.ACTION.SUBMIT;
+    const isSubmitType = iouType === CONST.IOU.TYPE.SUBMIT;
+    const isExpense = isExpenseReport(report);
+    const allowNegative = shouldEnableNegative(report, policy, iouType, currentTransaction?.participants);
+    const disableOppositeConversion = isCreateAction || (isSubmitType && isSubmitAction);
+    const transactionDetails = getTransactionDetails(currentTransaction, undefined, undefined, allowNegative, disableOppositeConversion);
     const currency = transactionDetails?.currency;
     const decimals = getCurrencyDecimals(currency);
 
@@ -178,8 +193,8 @@ function DynamicIOURequestStepTaxAmountPage({
             <MoneyRequestAmountForm
                 isEditing
                 currency={currency}
-                amount={Math.abs(transactionDetails?.taxAmount ?? 0)}
-                taxAmount={getTaxAmount(currentTransaction, policy, currency, decimals, true)}
+                amount={transactionDetails?.taxAmount ?? 0}
+                taxAmount={getTaxAmount(currentTransaction, policy, currency, decimals, true, isExpense, allowNegative, disableOppositeConversion)}
                 ref={(e) => {
                     textInput.current = e;
                 }}
@@ -188,6 +203,7 @@ function DynamicIOURequestStepTaxAmountPage({
                 onSubmitButtonPress={updateTaxAmount}
                 isCurrencyPressable={false}
                 chatReportID={reportID}
+                allowFlippingAmount={allowNegative}
             />
         </StepScreenWrapper>
     );

@@ -67,7 +67,8 @@ function TaxFields({policy, policyForMovingExpenses, iouCurrencyCode, canModifyT
     const shouldDisplayTaxRateError = formError === 'violations.taxOutOfPolicy';
     const isMovingCurrentTransactionFromTrackExpense = isMovingTransactionFromTrackExpense(action);
     const taxRates = policy?.taxRates ?? (isMovingCurrentTransactionFromTrackExpense ? policyForMovingExpenses?.taxRates : null);
-    const taxAmount = getTaxAmount(transactionForHelpers, false);
+    const isNegativeExpense = (taxSlice?.amount ?? 0) < 0;
+    const taxAmount = taxSlice?.taxAmount ?? 0;
     const effectiveCurrency = iouCurrencyCode ?? CONST.CURRENCY.USD;
     const decimals = getCurrencyDecimals(effectiveCurrency);
     const formattedTaxAmount = convertToDisplayString(taxAmount, effectiveCurrency);
@@ -230,6 +231,7 @@ function TaxFields({policy, policyForMovingExpenses, iouCurrencyCode, canModifyT
                         onInputChange={handleTaxAmountChange}
                         shouldShowBigNumberPad={false}
                         disabled={didConfirm}
+                        allowNegativeInput={isNegativeExpense}
                     />
                 </View>
             ) : (

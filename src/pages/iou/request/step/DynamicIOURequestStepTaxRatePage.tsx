@@ -18,6 +18,7 @@ import {convertToBackendAmount} from '@libs/CurrencyUtils';
 import getNonEmptyStringOnyxID from '@libs/getNonEmptyStringOnyxID';
 import {getSelectedWorkspacePolicyID, isMovingTransactionFromTrackExpense, pickReportForPolicy} from '@libs/IOUUtils';
 import Navigation from '@libs/Navigation/Navigation';
+import {isExpenseReport, shouldEnableNegative} from '@libs/ReportUtils';
 import type {TaxRatesOption} from '@libs/TaxOptionsListUtils';
 import {calculateTaxAmount, getAmount, getCurrency, getTaxRateTitle, getTaxValue} from '@libs/TransactionUtils';
 
@@ -156,7 +157,13 @@ function DynamicIOURequestStepTaxRatePage({
             return;
         }
 
-        const taxAmount = getTaxAmount(policy, currentTransaction, taxes.code, getAmount(currentTransaction, false, true), decimals);
+        const isCreateAction = action === CONST.IOU.ACTION.CREATE;
+        const isSubmitAction = action === CONST.IOU.ACTION.SUBMIT;
+        const isSubmitType = iouType === CONST.IOU.TYPE.SUBMIT;
+        const allowNegative = shouldEnableNegative(report, policy, iouType, currentTransaction?.participants);
+        const disableOppositeConversion = isCreateAction || (isSubmitType && isSubmitAction);
+        const transactionAmount = getAmount(currentTransaction, isExpenseReport(report), currentTransaction?.reportID === CONST.REPORT.UNREPORTED_REPORT_ID, allowNegative, disableOppositeConversion);
+        const taxAmount = getTaxAmount(policy, currentTransaction, taxes.code, transactionAmount, decimals);
         const taxValue = getTaxValue(policy, currentTransaction, taxes.code) ?? '';
 
         if (isEditingSplitBill) {
