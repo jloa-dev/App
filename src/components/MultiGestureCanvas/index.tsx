@@ -216,7 +216,7 @@ function MultiGestureCanvas({
     });
     const singleTapGesture = baseSingleTapGesture.requireExternalGestureToFail(doubleTapGesture, panGestureRef);
 
-    const panGestureSimultaneousList = useMemo(
+    const simultaneousGestureList = useMemo(
         () => (pagerRef === undefined ? [singleTapGesture, doubleTapGesture] : [pagerRef as unknown as Exclude<GestureRef, number>, singleTapGesture, doubleTapGesture]),
         [doubleTapGesture, pagerRef, singleTapGesture],
     );
@@ -236,7 +236,7 @@ function MultiGestureCanvas({
         shouldDisableSwipeDownToClose,
         onSwipeDown,
     })
-        .simultaneousWithExternalGesture(...panGestureSimultaneousList)
+        .simultaneousWithExternalGesture(...simultaneousGestureList)
         .withRef(panGestureRef);
 
     const pinchGesture = usePinchGesture({
@@ -252,7 +252,7 @@ function MultiGestureCanvas({
         onScaleChanged,
         isTransformGestureActive,
         shouldDisableTransformationGestures,
-    }).simultaneousWithExternalGesture(panGesture, singleTapGesture, doubleTapGesture);
+    }).simultaneousWithExternalGesture(panGesture, ...simultaneousGestureList);
 
     // Trigger a reset when the canvas gets inactive, but only if it was already mounted before
     const mounted = useRef(false);
