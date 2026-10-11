@@ -259,6 +259,17 @@ describe('TodosUtils', () => {
                 expect(result.transactionsByReportID[SUBMIT_REPORT_IDS.at(0) ?? '']).toHaveLength(1);
                 expect(result.transactionsByReportID[APPROVE_REPORT_IDS.at(0) ?? '']).toHaveLength(1);
             });
+
+            it('classifies report into export bucket when policyExporter is empty but connectionExporter is configured to user', () => {
+                const scenario = buildScenario();
+                const policyWithOnlyConnectionExporter = createPolicyWithQBOConnection(POLICY_WITH_CONNECTION_ID, {policyExporter: '', connectionExporter: CURRENT_USER_EMAIL});
+                const result = createTodosReportsAndTransactions({
+                    ...scenario,
+                    allPolicies: toPoliciesCollection([scenario.allPolicies[POLICY_ID], policyWithOnlyConnectionExporter]),
+                });
+
+                expect(result.reportsToExport.map((report) => report.reportID)).toEqual([EXPORT_REPORT_ID]);
+            });
         });
 
         it('excludes a report the current user approves for but does not own from the submit bucket', async () => {
