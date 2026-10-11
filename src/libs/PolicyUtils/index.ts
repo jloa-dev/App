@@ -2716,6 +2716,21 @@ function isMCPEnabled(policy: OnyxEntry<Policy>): boolean {
 }
 
 /**
+ * A member who was just invited is listed under an optimistic accountID derived from their login, and that entry is removed from
+ * personal details once the invite request finishes and the backend supplies the real accountID. A member details page opened
+ * while the invite was still in flight therefore holds a stale accountID in its route. Recover the login from the employee list
+ * so the page keeps resolving the member across that swap.
+ */
+function getMemberLoginByOptimisticAccountID(policy: OnyxEntry<Policy>, accountID: number): string {
+    const matchesOptimisticAccountID = (login: string) => generateAccountID(login) === accountID || generateAccountID(Str.removeSMSDomain(login)) === accountID;
+    const primaryLoginOfInvitedSecondary = Object.entries(policy?.primaryLoginsInvited ?? {}).find(([secondaryLogin]) => matchesOptimisticAccountID(secondaryLogin))?.[1];
+    if (primaryLoginOfInvitedSecondary) {
+        return primaryLoginOfInvitedSecondary;
+    }
+    return Object.keys(policy?.employeeList ?? {}).find(matchesOptimisticAccountID) ?? '';
+}
+
+/**
  * Returns the policy's default hourly rate for the Time Tracking feature.
  */
 function getDefaultTimeTrackingRate(policy: Partial<OnyxEntry<Policy>>): number | undefined {
@@ -2948,6 +2963,7 @@ export {
     isNonUSDPolicy,
     isTimeTrackingEnabled,
     isMCPEnabled,
+    getMemberLoginByOptimisticAccountID,
     getDefaultTimeTrackingRate,
     getActivePoliciesWithExpenseChatAndTimeEnabled,
     isPolicyTaxEnabled,
