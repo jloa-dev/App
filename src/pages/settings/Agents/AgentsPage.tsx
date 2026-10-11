@@ -61,14 +61,21 @@ function AgentsPage() {
     const isMobileSelectionModeEnabled = useMobileSelectionMode();
     useDocumentTitle(translate('agentsPage.title'));
 
+    const [isLoadingApp] = useOnyx(ONYXKEYS.IS_LOADING_APP);
+    const [areAgentsLoaded] = useOnyx(ONYXKEYS.ARE_AGENTS_LOADED);
     const [agentPrompts] = useOnyx(ONYXKEYS.COLLECTION.SHARED_NVP_AGENT_PROMPT);
     const [allPolicies] = useOnyx(ONYXKEYS.COLLECTION.POLICY);
     const personalDetailsList = usePersonalDetails();
     const canSelectMultiple = shouldUseNarrowLayout ? isMobileSelectionModeEnabled : true;
 
     useEffect(() => {
-        openAgentsPage();
-    }, []);
+        if (isLoadingApp) {
+            return;
+        }
+        if (!areAgentsLoaded) {
+            openAgentsPage();
+        }
+    }, [isLoadingApp, areAgentsLoaded]);
 
     const handleErrorClose = (pendingAction: PendingAction | null | undefined, accountID: number) => {
         if (pendingAction === CONST.RED_BRICK_ROAD_PENDING_ACTION.ADD) {

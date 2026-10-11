@@ -154,10 +154,58 @@ describe('AgentsPage', () => {
         expect(output).toContain('agentsPage.title');
     });
 
-    it('calls openAgentsPage on mount', () => {
+    it('calls openAgentsPage on mount when agents are not loaded', () => {
         render(<AgentsPage />);
 
         expect(mockOpenAgentsPage).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call openAgentsPage while isLoadingApp is true', () => {
+        mockUseOnyx.mockImplementation((key) => {
+            if (key === ONYXKEYS.IS_LOADING_APP) {
+                return [true, {status: 'loaded'}];
+            }
+            if (key === ONYXKEYS.ARE_AGENTS_LOADED) {
+                return [false, {status: 'loaded'}];
+            }
+            return [undefined, {status: 'loaded'}];
+        });
+
+        render(<AgentsPage />);
+
+        expect(mockOpenAgentsPage).not.toHaveBeenCalled();
+    });
+
+    it('calls openAgentsPage when areAgentsLoaded is reset to false after delegate switch', () => {
+        mockUseOnyx.mockImplementation((key) => {
+            if (key === ONYXKEYS.IS_LOADING_APP) {
+                return [false, {status: 'loaded'}];
+            }
+            if (key === ONYXKEYS.ARE_AGENTS_LOADED) {
+                return [false, {status: 'loaded'}];
+            }
+            return [undefined, {status: 'loaded'}];
+        });
+
+        render(<AgentsPage />);
+
+        expect(mockOpenAgentsPage).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call openAgentsPage if areAgentsLoaded is already true', () => {
+        mockUseOnyx.mockImplementation((key) => {
+            if (key === ONYXKEYS.IS_LOADING_APP) {
+                return [false, {status: 'loaded'}];
+            }
+            if (key === ONYXKEYS.ARE_AGENTS_LOADED) {
+                return [true, {status: 'loaded'}];
+            }
+            return [undefined, {status: 'loaded'}];
+        });
+
+        render(<AgentsPage />);
+
+        expect(mockOpenAgentsPage).not.toHaveBeenCalled();
     });
 
     it('shows empty state when no agents exist', () => {
