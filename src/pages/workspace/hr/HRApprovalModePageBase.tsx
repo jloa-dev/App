@@ -68,7 +68,7 @@ function HRApprovalModePageBase<T extends ApprovalModeValue>({policyID, config}:
     const [rules] = useOnyx(ONYXKEYS.COLLECTION.RULE);
 
     const providerName = config.getProviderName(policy);
-    const currentApprovalMode = config.getCurrentApprovalMode(policy);
+    const currentApprovalMode = config.getCurrentApprovalMode(policy) ?? (hasApprovalWorkflowRules(rules, policyID) ? config.approvalModes.CUSTOM : undefined);
     const [draftApprovalMode, setDraftApprovalMode] = useState<T | undefined>();
     const selectedApprovalMode = draftApprovalMode ?? currentApprovalMode;
     const isSaveDisabled = !draftApprovalMode || draftApprovalMode === currentApprovalMode;
