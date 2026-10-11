@@ -285,6 +285,7 @@ import {
     isFailedScanAmountPlaceholder,
     isFetchingWaypointsFromServer,
     isManagedCardTransaction,
+    canModifyCardExpenseReimbursable,
     isManualDistanceRequest as isManualDistanceRequestTransactionUtils,
     isMapDistanceRequest,
     isOnHold as isOnHoldTransactionUtils,
@@ -5668,6 +5669,9 @@ function canEditFieldOfMoneyRequest({
     const isRequestor = deprecatedCurrentUserAccountID === reportAction?.actorAccountID;
 
     if (fieldToEdit === CONST.EDIT_REQUEST_FIELD.REIMBURSABLE) {
+        if (isManagedCardTransaction(transaction) && !canModifyCardExpenseReimbursable(transaction)) {
+            return false;
+        }
         return canEditExpense;
     }
 

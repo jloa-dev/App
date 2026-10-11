@@ -1001,6 +1001,24 @@ function isManagedCardTransaction(transaction: OnyxEntry<Pick<Transaction, 'mana
 }
 
 /**
+ * Determine whether a company card expense's reimbursable toggle can be viewed/modified based on feed settings.
+ */
+function canModifyCardExpenseReimbursable(transaction: OnyxEntry<Transaction>): boolean {
+    if (isExpensifyCardTransaction(transaction)) {
+        return false;
+    }
+    if (!isManagedCardTransaction(transaction)) {
+        return false;
+    }
+    const forceReimbursable = transaction?.comment?.forceReimbursable ?? transaction?.forceReimbursable;
+    return (
+        forceReimbursable === CONST.COMPANY_CARD.FEED_FORCE_REIMBURSABLE.DEFAULT_YES ||
+        forceReimbursable === CONST.COMPANY_CARD.FEED_FORCE_REIMBURSABLE.DEFAULT_NO ||
+        forceReimbursable === CONST.COMPANY_CARD.FEED_FORCE_REIMBURSABLE.NONE
+    );
+}
+
+/**
  * Determine whether a transaction is imported from a credit card.
  * This includes managed cards (Expensify/Company cards) and personal cards imported via bank connection.
  */
@@ -1877,6 +1895,7 @@ export {
     hasPendingDistanceReceiptRegeneration,
     isExpensifyCardTransaction,
     isManagedCardTransaction,
+    canModifyCardExpenseReimbursable,
     isDuplicate,
     isPending,
     hasOnlyPendingCardTransactions,

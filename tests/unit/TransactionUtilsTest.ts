@@ -6619,3 +6619,54 @@ describe('buildOptimisticTransaction distance customUnit', () => {
         expect(existingTransaction.comment?.customUnit?.quantity).toBe(10);
     });
 });
+
+describe('canModifyCardExpenseReimbursable', () => {
+    it('returns false for Expensify cards', () => {
+        const transaction = generateTransaction({
+            bank: CONST.EXPENSIFY_CARD.BANK,
+            managedCard: true,
+            comment: {forceReimbursable: CONST.COMPANY_CARD.FEED_FORCE_REIMBURSABLE.DEFAULT_YES},
+        });
+        expect(TransactionUtils.canModifyCardExpenseReimbursable(transaction)).toBe(false);
+    });
+
+    it('returns false for non-managed card transactions', () => {
+        const transaction = generateTransaction({
+            managedCard: false,
+            comment: {forceReimbursable: CONST.COMPANY_CARD.FEED_FORCE_REIMBURSABLE.DEFAULT_YES},
+        });
+        expect(TransactionUtils.canModifyCardExpenseReimbursable(transaction)).toBe(false);
+    });
+
+    it('returns false when feed is set to force_no or force_yes', () => {
+        const forceNoTransaction = generateTransaction({
+            managedCard: true,
+            comment: {forceReimbursable: CONST.COMPANY_CARD.FEED_FORCE_REIMBURSABLE.FORCE_NO},
+        });
+        const forceYesTransaction = generateTransaction({
+            managedCard: true,
+            comment: {forceReimbursable: CONST.COMPANY_CARD.FEED_FORCE_REIMBURSABLE.FORCE_YES},
+        });
+        expect(TransactionUtils.canModifyCardExpenseReimbursable(forceNoTransaction)).toBe(false);
+        expect(TransactionUtils.canModifyCardExpenseReimbursable(forceYesTransaction)).toBe(false);
+    });
+
+    it('returns true when feed is set to default_yes, default_no, or none', () => {
+        const defaultYes = generateTransaction({
+            managedCard: true,
+            comment: {forceReimbursable: CONST.COMPANY_CARD.FEED_FORCE_REIMBURSABLE.DEFAULT_YES},
+        });
+        const defaultNo = generateTransaction({
+            managedCard: true,
+            comment: {forceReimbursable: CONST.COMPANY_CARD.FEED_FORCE_REIMBURSABLE.DEFAULT_NO},
+        });
+        const none = generateTransaction({
+            managedCard: true,
+            comment: {forceReimbursable: CONST.COMPANY_CARD.FEED_FORCE_REIMBURSABLE.NONE},
+        });
+        expect(TransactionUtils.canModifyCardExpenseReimbursable(defaultYes)).toBe(true);
+        expect(TransactionUtils.canModifyCardExpenseReimbursable(defaultNo)).toBe(true);
+        expect(TransactionUtils.canModifyCardExpenseReimbursable(none)).toBe(true);
+    });
+});
+

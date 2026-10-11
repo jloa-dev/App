@@ -34,6 +34,7 @@ import {
     hasSplitExpenseInSelection,
     isDistanceRequest,
     isManagedCardTransaction,
+    canModifyCardExpenseReimbursable,
     isPerDiemRequest,
     isTimeRequest,
 } from '@libs/TransactionUtils';
@@ -155,7 +156,8 @@ function SearchEditMultiplePage() {
         if (!transaction.reportID || transaction.reportID === CONST.REPORT.UNREPORTED_REPORT_ID) {
             return true;
         }
-        return !isIOUReport(report) && !isInvoiceReport(report) && transactionPolicy?.disabledFields?.reimbursable === false && !isManagedCardTransaction(transaction);
+        const isCardAllowed = isManagedCardTransaction(transaction) ? canModifyCardExpenseReimbursable(transaction) : true;
+        return !isIOUReport(report) && !isInvoiceReport(report) && transactionPolicy?.disabledFields?.reimbursable === false && isCardAllowed;
     });
 
     const policyID = getSearchBulkEditPolicyID(selectedTransactionIDs, activePolicyID, mergedTransactions, mergedReports);

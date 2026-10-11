@@ -58,6 +58,7 @@ import {
     getTaxName,
     isDistanceRequest,
     isManagedCardTransaction,
+    canModifyCardExpenseReimbursable,
     isManualDistanceRequest,
     isOdometerDistanceRequest,
     isPerDiemRequest,
@@ -246,7 +247,7 @@ function DynamicSplitExpenseEditPage({route}: DynamicSplitExpenseEditPageProps) 
     const shouldShowReimbursable =
         (isPolicyExpenseChat || (isExpenseUnreported && !!effectivePolicy)) &&
         (effectivePolicy?.disabledFields?.reimbursable !== true || isReimbursableDifferentFromPolicyDefault) &&
-        !isManagedCardTransaction(transaction);
+        (!isManagedCardTransaction(transaction) || canModifyCardExpenseReimbursable(transaction));
 
     const isDistance = isDistanceRequest(splitExpenseDraftTransaction);
     const isManualDistance = isManualDistanceRequest(splitExpenseDraftTransaction);

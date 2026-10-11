@@ -5216,6 +5216,13 @@ const CONST = {
     },
     CASH_CARD_NAME: '__CASH__',
     COMPANY_CARD: {
+        FEED_FORCE_REIMBURSABLE: {
+            FORCE_NO: 'force_no',
+            FORCE_YES: 'force_yes',
+            DEFAULT_YES: 'default_yes',
+            DEFAULT_NO: 'default_no',
+            NONE: 'none',
+        },
         // Mostly used for feed details
         FEED_BANK_NAME: {
             MASTER_CARD: 'cdf',
