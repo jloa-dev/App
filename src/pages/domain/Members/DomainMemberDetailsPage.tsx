@@ -135,7 +135,7 @@ function DomainMemberDetailsPage({route}: DomainMemberDetailsPageProps) {
     );
 
     const showUnlockAccountModal = () => {
-        requestUnlockAccount(accountID);
+        requestUnlockAccount(accountID, domainAccountID);
         showConfirmModal({
             title: translate('lockAccountPage.unlockTitle'),
             prompt: translate('lockAccountPage.unlockDescription'),
@@ -206,12 +206,15 @@ function DomainMemberDetailsPage({route}: DomainMemberDetailsPageProps) {
                 )}
 
                 {isAccountLocked ? (
-                    <MenuItemAction
-                        key="UnlockAccount"
-                        title={translate('lockAccountPage.unlockAccount')}
-                        icon={icons.Unlock}
-                        onPress={showUnlockAccountModal}
-                    />
+                    <OfflineWithFeedback pendingAction={domainPendingActions?.member?.[accountID]?.unlockAccount}>
+                        <MenuItemAction
+                            key="UnlockAccount"
+                            title={domainPendingActions?.member?.[accountID]?.unlockAccount ? translate('lockAccountPage.unlockRequested') : translate('lockAccountPage.unlockAccount')}
+                            icon={icons.Unlock}
+                            disabled={!!domainPendingActions?.member?.[accountID]?.unlockAccount}
+                            onPress={showUnlockAccountModal}
+                        />
+                    </OfflineWithFeedback>
                 ) : (
                     <MenuItem.Root
                         key="ReportSuspiciousActivity"

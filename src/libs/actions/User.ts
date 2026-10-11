@@ -1531,12 +1531,41 @@ function lockAccount(currentUserAccountID: number, accountID: number | undefined
     return API.makeRequestWithSideEffects(SIDE_EFFECT_REQUEST_COMMANDS.LOCK_ACCOUNT, params, {optimisticData, successData, failureData});
 }
 
-function requestUnlockAccount(accountID: number) {
+function requestUnlockAccount(accountID: number, domainAccountID?: number) {
     const params: LockAccountParams = {
         accountID,
+        domainAccountID,
     };
 
-    API.write(WRITE_COMMANDS.REQUEST_UNLOCK_ACCOUNT, params);
+    const optimisticData: OnyxUpdate[] = [];
+    const successData: OnyxUpdate[] = [];
+
+    if (domainAccountID) {
+        optimisticData.push({
+            onyxMethod: Onyx.METHOD.MERGE,
+            key: `${ONYXKEYS.COLLECTION.DOMAIN_PENDING_ACTIONS}${domainAccountID}`,
+            value: {
+                member: {
+                    [accountID]: {
+                        unlockAccount: CONST.RED_BRICK_ROAD_PENDING_ACTION.UPDATE,
+                    },
+                },
+            },
+        });
+        successData.push({
+            onyxMethod: Onyx.METHOD.MERGE,
+            key: `${ONYXKEYS.COLLECTION.DOMAIN_PENDING_ACTIONS}${domainAccountID}`,
+            value: {
+                member: {
+                    [accountID]: {
+                        unlockAccount: null,
+                    },
+                },
+            },
+        });
+    }
+
+    API.write(WRITE_COMMANDS.REQUEST_UNLOCK_ACCOUNT, params, {optimisticData, successData});
 }
 
 type RespondToProactiveAppReviewParams = {

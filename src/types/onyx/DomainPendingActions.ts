@@ -31,6 +31,11 @@ type DomainMemberPendingActions = {
      */
     lockAccount?: OnyxCommon.PendingAction;
 
+    /**
+     * Pending actions for specific domain member unlock account request.
+     */
+    unlockAccount?: OnyxCommon.PendingAction;
+
     changeDomainSecurityGroup?: OnyxCommon.PendingAction;
 } & GeneralDomainMemberPendingAction;
 
