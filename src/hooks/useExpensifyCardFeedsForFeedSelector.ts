@@ -15,7 +15,7 @@ function useExpensifyCardFeedsForFeedSelector(
     otherFeeds: ExpensifyCardFeedEntry[];
     allFeeds: ExpensifyCardFeedEntry[];
 } {
-    const {accountID: currentUserAccountID} = useCurrentUserPersonalDetails();
+    const {accountID: currentUserAccountID, login: currentUserLogin} = useCurrentUserPersonalDetails();
     const [cardSettingsCollection] = useOnyx(ONYXKEYS.COLLECTION.PRIVATE_EXPENSIFY_CARD_SETTINGS);
     const [policies] = useOnyx(ONYXKEYS.COLLECTION.POLICY);
     const [domains] = useOnyx(ONYXKEYS.COLLECTION.DOMAIN);
@@ -23,7 +23,7 @@ function useExpensifyCardFeedsForFeedSelector(
     if (!policyID) {
         return {primaryFeeds: [], otherFeeds: [], allFeeds: []};
     }
-    const allFeeds = getAdminExpensifyCardFeedEntries(cardSettingsCollection, policies, domains, currentUserAccountID, programs);
+    const allFeeds = getAdminExpensifyCardFeedEntries(cardSettingsCollection, policies, domains, currentUserAccountID, currentUserLogin, programs);
     const {primary, other} = partitionExpensifyCardFeedsForSelector(allFeeds, policyID);
     return {primaryFeeds: primary, otherFeeds: other, allFeeds};
 }

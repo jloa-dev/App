@@ -77,7 +77,8 @@ function isExpensifyCardFeedVisibleToAdmin(
     fundID: number,
     domains: OnyxCollection<Domain>,
     currentUserAccountID: number,
-    programs: ExpensifyCardFeedProgram[],
+    currentUserLogin?: string,
+    programs: ExpensifyCardFeedProgram[] = DEFAULT_CARD_FEED_PROGRAMS,
 ): boolean {
     if (!hasConfiguredExpensifyCardFeed(settings, programs)) {
         return false;
@@ -91,7 +92,7 @@ function isExpensifyCardFeedVisibleToAdmin(
 
     // Source 2: the user is an admin of a non-deleted policy whose policyAccountID matches the fundID.
     return Object.values(policies ?? {}).some(
-        (policy) => policy?.policyAccountID === fundID && isPolicyAdmin(policy) && policy?.pendingAction !== CONST.RED_BRICK_ROAD_PENDING_ACTION.DELETE,
+        (policy) => policy?.policyAccountID === fundID && isPolicyAdmin(policy, currentUserLogin) && policy?.pendingAction !== CONST.RED_BRICK_ROAD_PENDING_ACTION.DELETE,
     );
 }
 
@@ -105,6 +106,7 @@ function getAdminExpensifyCardFeedEntries(
     policies: OnyxCollection<Policy>,
     domains: OnyxCollection<Domain>,
     currentUserAccountID: number,
+    currentUserLogin?: string,
     programs: ExpensifyCardFeedProgram[] = DEFAULT_CARD_FEED_PROGRAMS,
 ): ExpensifyCardFeedEntry[] {
     return Object.entries(cardSettingsCollection ?? {}).flatMap(([settingsKey, settings]) => {
@@ -112,7 +114,7 @@ function getAdminExpensifyCardFeedEntries(
             return [];
         }
         const fundID = getFundIdFromSettingsKey(settingsKey);
-        if (!isExpensifyCardFeedVisibleToAdmin(settings, policies, fundID, domains, currentUserAccountID, programs)) {
+        if (!isExpensifyCardFeedVisibleToAdmin(settings, policies, fundID, domains, currentUserAccountID, currentUserLogin, programs)) {
             return [];
         }
         return [{settingsKey, fundID, settings}];

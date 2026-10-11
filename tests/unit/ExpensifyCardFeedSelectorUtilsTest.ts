@@ -203,6 +203,27 @@ describe('getAdminExpensifyCardFeedEntries', () => {
         expect(entries).toHaveLength(0);
     });
 
+    it('hides a feed when the user login is demoted to a regular user in the policy employee list', () => {
+        const userEmail = 'employee@workspace.com';
+        const demotedPolicy = createPolicyCollection([
+            createAdminPolicy({
+                id: workspacePolicyID,
+                policyAccountID: feedFundID,
+                role: CONST.POLICY.ROLE.ADMIN,
+                employeeList: {
+                    [userEmail]: {
+                        email: userEmail,
+                        role: CONST.POLICY.ROLE.USER,
+                    },
+                },
+            }),
+        ]);
+
+        const entries = getAdminExpensifyCardFeedEntries(cardSettingsCollection, demotedPolicy, {}, currentUserAccountID, userEmail);
+
+        expect(entries).toHaveLength(0);
+    });
+
     it('does not use preferredPolicy for visibility', () => {
         const settingsWithPreferredPolicyOnly: OnyxCollection<ExpensifyCardSettings> = {
             [`${ONYXKEYS.COLLECTION.PRIVATE_EXPENSIFY_CARD_SETTINGS}${feedFundID}`]: {...feedSettings, preferredPolicy: workspacePolicyID},
