@@ -10212,9 +10212,10 @@ function getViolatingReportIDForRBRInLHN(report: OnyxEntry<Report>, transactionV
             // consistent with what the opened report renders, which also filters out DELETE-pending transactions.
             const transactions = getReportTransactions(potentialReport.reportID).filter((transaction) => !isTransactionPendingDelete(transaction));
 
-            // A submitted `companyCardRequired` is not actionable by the submitter, so it must not drive the RBR. It is
-            // excluded by name because the back end owns its type.
-            const excludedViolationNamesForLHN: ViolationName[] = isProcessingReport(potentialReport) ? [CONST.VIOLATIONS.COMPANY_CARD_REQUIRED] : [];
+            // A submitted `companyCardRequired`, `receiptRequired`, or `itemizedReceiptRequired` is not actionable by the submitter, so it must not drive the RBR.
+            const excludedViolationNamesForLHN: ViolationName[] = isProcessingReport(potentialReport)
+                ? [CONST.VIOLATIONS.COMPANY_CARD_REQUIRED, CONST.VIOLATIONS.RECEIPT_REQUIRED, CONST.VIOLATIONS.ITEMIZED_RECEIPT_REQUIRED]
+                : [];
             const excludedNoticeNamesForLHN: ViolationName[] = isProcessingReport(potentialReport) ? [CONST.VIOLATIONS.MODIFIED_AMOUNT] : [];
 
             return (

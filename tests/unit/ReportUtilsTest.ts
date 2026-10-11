@@ -19673,6 +19673,44 @@ describe('ReportUtils', () => {
 
                 await Onyx.clear();
             });
+
+            it('should return null when the only violation on a submitted report is receiptRequired', async () => {
+                await Onyx.clear();
+
+                const {chatReport, transactionViolationsCollection} = await setUpCompanyCardRequiredScenario('submitted-receipt-required', [
+                    {name: CONST.VIOLATIONS.RECEIPT_REQUIRED, type: CONST.VIOLATION_TYPES.VIOLATION, showInReview: true},
+                ]);
+
+                expect(getViolatingReportIDForRBRInLHN(chatReport, transactionViolationsCollection)).toBeNull();
+
+                await Onyx.clear();
+            });
+
+            it('should return null when the only violation on a submitted report is itemizedReceiptRequired', async () => {
+                await Onyx.clear();
+
+                const {chatReport, transactionViolationsCollection} = await setUpCompanyCardRequiredScenario('submitted-itemized-receipt-required', [
+                    {name: CONST.VIOLATIONS.ITEMIZED_RECEIPT_REQUIRED, type: CONST.VIOLATION_TYPES.VIOLATION, showInReview: true},
+                ]);
+
+                expect(getViolatingReportIDForRBRInLHN(chatReport, transactionViolationsCollection)).toBeNull();
+
+                await Onyx.clear();
+            });
+
+            it('should still surface RBR when receiptRequired violation is on an open report', async () => {
+                await Onyx.clear();
+
+                const {chatReport, expenseReportID, transactionViolationsCollection} = await setUpCompanyCardRequiredScenario(
+                    'open-receipt-required',
+                    [{name: CONST.VIOLATIONS.RECEIPT_REQUIRED, type: CONST.VIOLATION_TYPES.VIOLATION, showInReview: true}],
+                    true,
+                );
+
+                expect(getViolatingReportIDForRBRInLHN(chatReport, transactionViolationsCollection)).toBe(expenseReportID);
+
+                await Onyx.clear();
+            });
         });
     });
 
