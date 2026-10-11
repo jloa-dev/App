@@ -109,6 +109,18 @@ const isExpensifyCardContinuousReconciliationEnabledSelector = (value: boolean |
 /** Picks the shared company card custom names from a domain's card feeds, avoiding a subscription to the entire CardFeeds object. */
 const companyCardCustomNamesSelector = (cardFeeds: OnyxEntry<CardFeeds>) => cardFeeds?.settings?.companyCardCustomNames;
 
+/** Combines shared company card custom names from all domain member card feeds into a single lookup record. */
+const allSharedCompanyCardCustomNamesSelector = (sharedNvp: OnyxCollection<CardFeeds>): Record<string, string> => {
+    const combined: Record<string, string> = {};
+    for (const member of Object.values(sharedNvp ?? {})) {
+        if (!member?.settings?.companyCardCustomNames) {
+            continue;
+        }
+        Object.assign(combined, member.settings.companyCardCustomNames);
+    }
+    return combined;
+};
+
 /**
  * Determines whether a workspace has at least one active Expensify Card.
  * Intended to run against a single WorkspaceCardsList entry subscribed by its exact
@@ -133,6 +145,7 @@ export {
     getBankLinkedPersonalCards,
     isExpensifyCardContinuousReconciliationEnabledSelector,
     companyCardCustomNamesSelector,
+    allSharedCompanyCardCustomNamesSelector,
     hasIssuedExpensifyCardSelector,
     hasActiveExpensifyCardSelector,
 };

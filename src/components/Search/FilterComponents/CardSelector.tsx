@@ -19,6 +19,8 @@ import useThemeStyles from '@hooks/useThemeStyles';
 import {buildCardsData} from '@libs/CardFeedUtils';
 import type {CardFilterItem} from '@libs/CardFeedUtils';
 
+import {allSharedCompanyCardCustomNamesSelector} from '@selectors/Card';
+
 import variables from '@styles/variables';
 
 import CONST from '@src/CONST';
@@ -43,6 +45,7 @@ function CardSelector({value = [], selectionListTextInputStyle, selectionListSty
     const {isLoadingInitialCards} = useLoadSearchCardData();
     const [userCardList, userCardListMetadata] = useOnyx(ONYXKEYS.CARD_LIST);
     const [customCardNames] = useOnyx(ONYXKEYS.NVP_EXPENSIFY_COMPANY_CARDS_CUSTOM_NAMES);
+    const [sharedCardCustomNames] = useOnyx(ONYXKEYS.COLLECTION.SHARED_NVP_PRIVATE_DOMAIN_MEMBER, {selector: allSharedCompanyCardCustomNamesSelector});
     const [workspaceCardFeeds, workspaceCardFeedsMetadata] = useOnyx(ONYXKEYS.COLLECTION.WORKSPACE_CARDS_LIST);
     const [searchTerm, debouncedSearchTerm, setSearchTerm] = useDebouncedState('');
     const personalDetails = usePersonalDetails();
@@ -56,9 +59,20 @@ function CardSelector({value = [], selectionListTextInputStyle, selectionListSty
         companyCardFeedIcons,
         false,
         customCardNames,
+        sharedCardCustomNames,
     );
 
-    const closedCardsSectionData = buildCardsData(workspaceCardFeeds ?? {}, userCardList ?? {}, personalDetails ?? {}, value, illustrations, companyCardFeedIcons, true, customCardNames);
+    const closedCardsSectionData = buildCardsData(
+        workspaceCardFeeds ?? {},
+        userCardList ?? {},
+        personalDetails ?? {},
+        value,
+        illustrations,
+        companyCardFeedIcons,
+        true,
+        customCardNames,
+        sharedCardCustomNames,
+    );
 
     const shouldShowSearchInput = individualCardsSectionData.length + closedCardsSectionData.length >= CONST.STANDARD_LIST_ITEM_LIMIT;
 

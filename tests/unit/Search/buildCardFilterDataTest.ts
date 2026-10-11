@@ -417,4 +417,15 @@ describe('buildCardsData isPersonal with customCardNames', () => {
         expect(personalCard).toBeDefined();
         expect(personalCard?.cardName).toBe('455594XXXXXX1138');
     });
+
+    it('Uses sharedCardCustomNames for company cards when provided', () => {
+        const sharedCardCustomNames: Record<string, string> = {
+            '21604933': 'Marketing Corporate Card',
+        };
+        const result = buildCardsData(workspaceCardFeeds, cardList, {}, [], illustrationsMock, companyCardIconsMock, false, undefined, sharedCardCustomNames);
+
+        const companyCard = result.find((card) => card.keyForList === '21604933');
+        expect(companyCard).toBeDefined();
+        expect(companyCard?.cardName).toBe('Marketing Corporate Card');
+    });
 });
