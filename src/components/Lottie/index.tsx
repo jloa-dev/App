@@ -36,12 +36,12 @@ function Lottie({ref, source, webStyle, shouldLoadAfterInteractions, ...props}: 
 
     useNetwork({onReconnect: () => setIsError(false)});
 
-    const [animationFile, setAnimationFile] = useState<string | AnimationObject | {uri: string}>();
+    const [animationFile, setAnimationFile] = useState<string | AnimationObject | {uri: string}>(source.file);
     const [isInteractionComplete, setIsInteractionComplete] = useState(false);
 
     useEffect(() => {
         setAnimationFile(source.file);
-    }, [setAnimationFile, source.file]);
+    }, [source.file]);
 
     useEffect(() => {
         if (!shouldLoadAfterInteractions) {
@@ -93,13 +93,18 @@ function Lottie({ref, source, webStyle, shouldLoadAfterInteractions, ...props}: 
     }, [browser, navigationContainerRef, navigator]);
 
     // If user is being navigated away, let pause the animation to prevent memory leak.
+    // When returning, resume playback if autoPlay is enabled.
     // see issue: https://github.com/Expensify/App/issues/36645
     useEffect(() => {
-        if (!animationRef.current || !hasNavigatedAway) {
+        if (!animationRef.current) {
             return;
         }
-        animationRef?.current?.pause();
-    }, [hasNavigatedAway]);
+        if (hasNavigatedAway) {
+            animationRef.current.pause();
+        } else if (props.autoPlay && !isReduceMotionEnabled) {
+            animationRef.current.play();
+        }
+    }, [hasNavigatedAway, isReduceMotionEnabled, props.autoPlay]);
 
     // If the page navigates to another screen, the image fails to load, app is in background state, animation file isn't ready, or the splash screen isn't hidden yet,
     // we'll just render an empty view as the fallback to prevent
