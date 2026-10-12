@@ -364,7 +364,7 @@ function BaseSelectionListWithSectionsImpl({
                     getItemType={getItemType}
                     initialScrollIndex={targetScrollIndex}
                     overrideProps={FLASH_LIST_OVERRIDE_PROPS}
-                    keyExtractor={(item) => ('flatListKey' in item ? item.flatListKey : item.keyForList)}
+                    keyExtractor={(item, index) => (item && 'flatListKey' in item ? item.flatListKey : item?.keyForList ?? index.toString())}
                     onEndReached={onEndReached}
                     onEndReachedThreshold={onEndReachedThreshold}
                     onScrollBeginDrag={onScrollBeginDrag}
