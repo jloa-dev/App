@@ -80,7 +80,25 @@ const registerPrefetchOnAppStart: RegisterPrefetchOnAppStart = ({prefetchKey, fe
     }
 
     registerPrefetchTokenRefresh();
-    prefetchOnAppStart(url, fetchParams).catch((error) => {
+
+    // The `appversion` parameter is omitted intentionally from startup prefetch bodies,
+    // matching buildAuthenticateBody. Otherwise, after an app update from the store,
+    // the cached prefetch sends the previous build's version and triggers a false 426 Update Required.
+    let prefetchParams = fetchParams;
+    if (fetchParams.body instanceof FormData) {
+        const sanitizedBody = new FormData();
+        fetchParams.body.forEach((value, key) => {
+            if (key !== 'appversion') {
+                sanitizedBody.append(key, value);
+            }
+        });
+        prefetchParams = {
+            ...fetchParams,
+            body: sanitizedBody,
+        };
+    }
+
+    prefetchOnAppStart(url, prefetchParams).catch((error) => {
         Log.warn(`[NitroFetch] prefetchOnAppStart failed for ${command}`, {error, fetchParams, url});
     });
 };
