@@ -239,7 +239,7 @@ function PolicyAccountingPage({policy}: PolicyAccountingPageProps) {
                       {
                           icon: icons.Sync,
                           text: translate('workspace.accounting.syncNow'),
-                          onSelected: () => syncConnection(policy, connectedIntegration),
+                          onSelected: () => syncConnection(policy, connectedIntegration, true),
                           disabled: isOffline,
                       },
                   ]
