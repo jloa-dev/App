@@ -16,7 +16,7 @@ import {calculateAmount, isMovingTransactionFromTrackExpense, isParticipantP2P} 
 import {isConfirmationAmountMissing} from '@libs/MoneyRequestUtils';
 import Navigation from '@libs/Navigation/Navigation';
 import {shouldEnableNegative} from '@libs/ReportUtils';
-import {calculateTaxAmount, getTaxCode, getTaxValue, hasAnyManuallyEnteredScanField} from '@libs/TransactionUtils';
+import {calculateTaxAmount, getTaxCode, getTaxValue, hasAnyManuallyEnteredScanField, isScanning} from '@libs/TransactionUtils';
 
 import IOURequestStepCurrencyModal from '@pages/iou/request/step/IOURequestStepCurrencyModal';
 
@@ -92,7 +92,7 @@ function AmountField({
     const [isCurrencyPickerVisible, setIsCurrencyPickerVisible] = useState(false);
     const [isAmountInputFocused, setIsAmountInputFocused] = useState(false);
 
-    const isAmountFieldDisabled = didConfirm || isReadOnly || shouldShowTimeRequestFields || isDistanceRequest;
+    const isAmountFieldDisabled = didConfirm || isReadOnly || shouldShowTimeRequestFields || isDistanceRequest || (isScanning(transactionForHandlers) && !canEnterScanFieldsManually);
     // The read-only row only opens the amount page for a form whose amount the user could have typed in the first
     // place. A distance or time amount is computed from the fields below it, so its row has nothing to open and is
     // not offered as a control at all: no caret, no hover, no press.
@@ -126,6 +126,7 @@ function AmountField({
     // input doesn't retain the original "$0.00 with no error" bug.
     const shouldShowEmptyAmount =
         (!transactionSlice?.isAmountSet && (transactionSlice?.iouRequestType === CONST.IOU.REQUEST_TYPE.MANUAL || canEnterScanFieldsManually)) ||
+        isScanning(transactionForHandlers) ||
         !!transactionSlice?.isFailedScanAmountPlaceholder;
     const transactionAmount = shouldShowEmptyAmount ? '' : convertToFrontendAmountAsString(amount, decimals);
     // The hint says SmartScan will fill this in. It goes once the user takes the field over, by focusing it or by
