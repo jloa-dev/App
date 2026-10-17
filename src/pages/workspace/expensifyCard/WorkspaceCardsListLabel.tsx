@@ -187,6 +187,7 @@ function WorkspaceCardsListLabel({type, value, style}: WorkspaceCardsListLabelPr
         const feedKey = fundIDForFeedKey ? `${fundIDForFeedKey}_${CONST.EXPENSIFY_CARD.BANK}` : CONST.EXPENSIFY_CARD.BANK;
         const query = buildQueryStringFromFilterFormValues({
             type: CONST.SEARCH.DATA_TYPES.EXPENSE,
+            policyID: [policyID],
             feed: [feedKey],
             withdrawalStatus: [CONST.SEARCH.SETTLEMENT_STATUS.NEVER, CONST.SEARCH.SETTLEMENT_STATUS.PENDING],
         });
