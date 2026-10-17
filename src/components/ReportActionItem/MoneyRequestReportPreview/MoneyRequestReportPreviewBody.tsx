@@ -76,7 +76,7 @@ function MoneyRequestReportPreviewBody({
     const {checkIfContextMenuActive} = useShowContextMenuActions();
 
     const {action, iouReport, chatReportID} = useReportPreviewData();
-    const {isTransitionPending, isScanning, reportPreviewStyles} = useReportPreviewUIState();
+    const {isTransitionPending, isScanning, reportPreviewStyles, shouldShowAccessPlaceHolder} = useReportPreviewUIState();
 
     const isReportDeleted = action?.pendingAction === CONST.RED_BRICK_ROAD_PENDING_ACTION.DELETE;
     const isRejectedReport = iouReport?.stateNum === CONST.REPORT.STATE_NUM.OPEN && iouReport?.nextStep?.messageKey === CONST.NEXT_STEP.MESSAGE_KEY.REJECTED_REPORT;
@@ -100,8 +100,8 @@ function MoneyRequestReportPreviewBody({
                     testID="carouselWidthSetter"
                 >
                     <PressableWithoutFeedback
-                        onPress={onPress}
-                        onPressIn={() => canUseTouchScreen() && ControlSelection.block()}
+                        onPress={shouldShowAccessPlaceHolder ? undefined : onPress}
+                        onPressIn={() => !shouldShowAccessPlaceHolder && canUseTouchScreen() && ControlSelection.block()}
                         onPressOut={() => ControlSelection.unblock()}
                         onLongPress={(event) => {
                             if (!shouldDisplayContextMenu) {
@@ -115,9 +115,10 @@ function MoneyRequestReportPreviewBody({
                             styles.justifyContentBetween,
                             StyleUtils.getBackgroundColorStyle(theme.cardBG),
                             shouldShowBorder ? styles.borderedContentCardLarge : styles.reportContainerBorderRadius,
+                            (isReportDeleted || shouldShowAccessPlaceHolder) && styles.cursorDefault,
                             isReportDeleted && styles.pointerEventsNone,
                         ]}
-                        role={CONST.ROLE.BUTTON}
+                        role={shouldShowAccessPlaceHolder ? undefined : CONST.ROLE.BUTTON}
                         isNested
                         accessibilityLabel={translate('iou.viewDetails')}
                         sentryLabel={CONST.SENTRY_LABEL.REPORT_PREVIEW.CARD}

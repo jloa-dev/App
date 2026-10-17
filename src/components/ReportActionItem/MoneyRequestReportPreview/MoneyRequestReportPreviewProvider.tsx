@@ -208,7 +208,7 @@ function MoneyRequestReportPreviewProvider({
     });
 
     const openReportFromPreview = useCallback(() => {
-        if (!iouReportID) {
+        if (!iouReportID || shouldShowAccessPlaceHolder) {
             return;
         }
         const routeAtPress = Navigation.getActiveRoute();
