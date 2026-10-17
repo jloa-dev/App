@@ -11,9 +11,12 @@ function RightModalRouter(options: RightModalNavigatorRouterOptions) {
 
     return {
         ...stackRouter,
-        getInitialState({routeNames, routeParamList, routeGetIdList}: RouterConfigOptions) {
+        getInitialState(configOptions: RouterConfigOptions) {
             const preservedState = getPreservedNavigatorState(options.parentRoute.key);
-            return preservedState ?? stackRouter.getInitialState({routeNames, routeParamList, routeGetIdList});
+            if (preservedState && Array.isArray(preservedState.routes) && preservedState.routes.length > 0) {
+                return stackRouter.getRehydratedState(preservedState, configOptions);
+            }
+            return stackRouter.getInitialState(configOptions);
         },
     };
 }

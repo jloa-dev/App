@@ -40,8 +40,8 @@ function WorkspaceRouter(options: WorkspaceNavigatorRouterOptions) {
         ...stackRouter,
         getInitialState(configOptions: RouterConfigOptions) {
             const preservedState = getPreservedNavigatorState(options.parentRoute.key);
-            if (preservedState) {
-                return preservedState;
+            if (preservedState && Array.isArray(preservedState.routes) && preservedState.routes.length > 0) {
+                return stackRouter.getRehydratedState(preservedState, configOptions);
             }
             const sessionState = buildWorkspaceInitialStateFromSessionStorage();
             if (sessionState) {

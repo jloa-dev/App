@@ -185,7 +185,10 @@ function SplitRouter(options: SplitNavigatorRouterOptions) {
         },
 
         getInitialState({routeNames, routeParamList, routeGetIdList}: RouterConfigOptions) {
-            const initialState = getPreservedNavigatorState(options.parentRoute.key) ?? stackRouter.getInitialState({routeNames, routeParamList, routeGetIdList});
+            const preservedState = getPreservedNavigatorState(options.parentRoute.key);
+            const initialState = preservedState && Array.isArray(preservedState.routes) && preservedState.routes.length > 0
+                ? stackRouter.getRehydratedState(preservedState, {routeNames, routeParamList, routeGetIdList})
+                : stackRouter.getInitialState({routeNames, routeParamList, routeGetIdList});
             const maybeAdaptedState = adaptStateIfNecessary({state: initialState, options});
 
             // If we needed to modify the state we need to rehydrate it to get keys for new routes.
