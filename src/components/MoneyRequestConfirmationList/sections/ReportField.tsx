@@ -9,7 +9,7 @@ import createDynamicRoute from '@libs/Navigation/helpers/dynamicRoutesUtils/crea
 import Navigation from '@libs/Navigation/Navigation';
 import Parser from '@libs/Parser';
 import {getReportName} from '@libs/ReportNameUtils';
-import {generateReportID, getOutstandingReportsForUser, isMoneyRequestReport, isReportOutstanding, sortOutstandingReportsBySelected} from '@libs/ReportUtils';
+import {canAddTransaction, generateReportID, getOutstandingReportsForUser, isMoneyRequestReport, isReportOutstanding, sortOutstandingReportsBySelected} from '@libs/ReportUtils';
 
 import CONST from '@src/CONST';
 import type {IOUAction, IOUType} from '@src/CONST';
@@ -21,7 +21,7 @@ import type {Participant} from '@src/types/onyx/IOU';
 import type {OnyxEntry} from 'react-native-onyx';
 
 import {createOutstandingReportsForPolicySelector} from '@selectors/Report';
-import React from 'react';
+import React, {useMemo} from 'react';
 
 import ExpenseFieldRow from './ExpenseFieldRow';
 import {useExpenseFormLayout} from './ExpenseFormLayoutContext';
@@ -111,9 +111,13 @@ function ReportField({selectedParticipants, iouType, reportID, reportActionID, a
     })();
 
     const outstandingReports = useOutstandingReports(undefined, isFromGlobalCreate && !isPerDiemRequest ? undefined : policyID, ownerAccountID, false);
+    const eligibleOutstandingReports = useMemo(() => {
+        return outstandingReports.filter((report) => canAddTransaction(report, rules, undefined, true));
+    }, [outstandingReports, rules]);
+
     // When creating an expense in an individual report, the report field becomes read-only
     // since the destination is already determined and there's no need to show a selectable list.
-    const shouldReportBeEditable = (isUnreported ? outstandingReports.length >= 1 : outstandingReports.length > 1) && !isMoneyRequestReport(reportID);
+    const shouldReportBeEditable = (isUnreported ? eligibleOutstandingReports.length >= 1 : eligibleOutstandingReports.length > 1) && !isMoneyRequestReport(reportID);
 
     const openReportPage = () => {
         if (!transactionID || !selectedReportID) {
