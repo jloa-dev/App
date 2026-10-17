@@ -41,7 +41,9 @@ function ConfirmationStep({onNext, onMove, isEditing}: SubPageProps) {
             phoneNumber: (phone && formatE164PhoneNumber(phone, countryCode)) ?? '',
             legalFirstName: bankAccountPersonalDetails?.legalFirstName ?? privatePersonalDetails?.legalFirstName ?? '',
             legalLastName: bankAccountPersonalDetails?.legalLastName ?? privatePersonalDetails?.legalLastName ?? '',
-            addressStreet: bankAccountPersonalDetails?.addressStreet ?? currentAddress?.street ?? '',
+            addressStreet: bankAccountPersonalDetails?.addressStreet2
+                ? `${bankAccountPersonalDetails.addressStreet}, ${bankAccountPersonalDetails.addressStreet2}`
+                : (bankAccountPersonalDetails?.addressStreet ?? currentAddress?.street ?? ''),
             addressCity: bankAccountPersonalDetails?.addressCity ?? currentAddress?.city ?? '',
             addressState: bankAccountPersonalDetails?.addressState ?? currentAddress?.state ?? '',
             addressZip: bankAccountPersonalDetails?.addressZipCode ?? currentAddress?.zip ?? '',
