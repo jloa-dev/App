@@ -753,6 +753,7 @@ function MoneyRequestReceiptView({
                                     {({isHovering}) => (
                                         <>
                                             <ReportActionItemImage
+                                                resizeMode={!fillSpace ? 'contain' : undefined}
                                                 shouldUseThumbnailImage={!fillSpace}
                                                 shouldUseFullHeight={fillSpace}
                                                 canZoomReceipt={canZoomReceipt}

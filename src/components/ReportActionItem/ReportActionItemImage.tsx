@@ -98,6 +98,9 @@ type ReportActionItemImageProps = {
     /** Whether the receipt can be hover-zoomed. When true, remote PDFs render the actual PDF on top of the thumbnail so magnification stays sharp (web only). */
     canZoomReceipt?: boolean;
 
+    /** Resize mode for the receipt image */
+    resizeMode?: ReceiptImageProps['resizeMode'];
+
     /** Callback to be called when the image loads */
     onLoad?: (event?: {nativeEvent: {width: number; height: number}}) => void;
 
@@ -130,6 +133,7 @@ function ReportActionItemImage({
     report: reportProp,
     shouldUseThumbnailImage,
     canZoomReceipt = false,
+    resizeMode,
     onLoad,
     onLoadFailure,
 }: ReportActionItemImageProps) {
@@ -198,6 +202,7 @@ function ReportActionItemImage({
 
             // If the image is full height, use initial position to make sure it will grow properly to fill the container
             shouldUseInitialObjectPosition: isMapDistanceRequest && !shouldUseFullHeight,
+            resizeMode,
         };
     } else if (effectiveIsLocalFile && isPDF && typeof originalImageSource === 'string') {
         propsObj = {isPDFThumbnail: true, source: originalImageSource};
@@ -214,6 +219,7 @@ function ReportActionItemImage({
             // If the image is full height, use initial position to make sure it will grow properly to fill the container
             shouldUseInitialObjectPosition: isMapDistanceRequest && !shouldUseFullHeight,
             isEmptyReceipt,
+            resizeMode,
             onPress,
         };
     }
